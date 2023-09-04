@@ -1,3 +1,11 @@
 [submodule "License-Plate-Detection"]
 	path = License-Plate-Detection
 	url = https://github.com/skatld123/License-Plate-Detection.git
+
+[submodule "weighted_box_fusion"]
+	path = weighted_box_fusion
+	url = https://github.com/skatld123/Object-Detection-WBF.git
+
+[submodule "plate_landmark_detection"]
+	path = plate_landmark_detection
+	url = https://github.com/skatld123/License-Plate-Landmarks-detection.git
