@@ -1,0 +1,3 @@
+[submodule "License-Plate-Detection"]
+	path = License-Plate-Detection
+	url = https://github.com/skatld123/License-Plate-Detection.git
