@@ -1,9 +1,9 @@
-[submodule "License-Plate-Detection"]
-	path = License-Plate-Detection
-	url = https://github.com/skatld123/License-Plate-Detection.git
-[submodule "Object-Detection-WBF"]
-	path = Object-Detection-WBF
-	url = https://github.com/skatld123/Object-Detection-WBF.git
-[submodule "License-Plate-Landmarks-detection"]
-	path = License-Plate-Landmarks-detection
-	url = https://github.com/skatld123/License-Plate-Landmarks-detection.git
+[submodule "clp_landmark_detection"]
+	path = clp_landmark_detection
+	url = https://github.com/skatld123/clp_landmark_detection.git
+[submodule "license_plate_mmdetection"]
+	path = license_plate_mmdetection
+	url = https://github.com/skatld123/license_plate_mmdetection.git
+[submodule "weighted_box_fusion"]
+	path = weighted_box_fusion
+	url = https://github.com/skatld123/weighted_box_fusion.git

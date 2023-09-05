@@ -1,5 +1,5 @@
-from ensemble_model.utils import boundingBoxes, getArea, getUnionAreas, boxesIntersect, getIntersectionArea, iou, AP, mAP, boxPlot
-import ensemble_model.clp_ensemble as ensemble
+from Object-Detection-WBF.utils import boundingBoxes, getArea, getUnionAreas, boxesIntersect, getIntersectionArea, iou, AP, mAP, boxPlot
+import Object-Detection-WBF.clp_ensemble as ensemble
 
 # Specify the path to model config and checkpoint file
 config_file_1 = '/root/De-identification-CLP/weights/dino_2044_new_50/dino-5scale_swin-l_8xb2-36e_coco.py'
@@ -64,7 +64,10 @@ if __name__ == '__main__':
     print(f"mAP : {mAP(result)}")
     
     # detections을 받아서 원본 이미지에서 크롭하기, 
-    # 크롭된 이미지를 Plate-Landmarks-detection에 넣기 
+    
+    # 크롭된 이미지를 Plate-Landmarks-detection에 입력으로 넣기 
+    # 이 때, 이미지 이름을 보존한 채로 Plate-Landmarks-detection의 포인트를 획득 한 뒤 해당 영역에 대한 전체적인 마스크를 그려볼 것
+    
     # Plate-Landmarks-detection의 결과이미지를 받고 deidentification해서 번호판 붙이기
     
     # 잘랐던 바운딩 박스영역에 deid한 이미지를 붙이기
