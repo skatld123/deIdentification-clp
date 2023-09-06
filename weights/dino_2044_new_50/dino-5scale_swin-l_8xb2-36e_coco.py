@@ -180,7 +180,8 @@ vis_backends = [dict(type='LocalVisBackend')]
 visualizer = dict(
     type='DetLocalVisualizer',
     vis_backends=[dict(type='LocalVisBackend')],
-    name='visualizer')
+    name='visualizer',
+    save_dir=None)
 log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)
 log_level = 'INFO'
 load_from = 'work_dirs/dino_2044_new_50/best_coco_bbox_mAP_epoch_38.pth'
