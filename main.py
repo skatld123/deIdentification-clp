@@ -1,123 +1,147 @@
+import argparse
 import csv
 import json
 import os
 import ast
+import cv2
 from tqdm import tqdm
 from weighted_box_fusion.utils import boundingBoxes, getArea, getUnionAreas, boxesIntersect, getIntersectionArea, iou, AP, mAP, boxPlot
 import weighted_box_fusion.clp_ensemble as ensemble
 import clp_landmark_detection.detect as landmark
 from PIL import Image
+import numpy as np
+import config as cf
+from deId import deIdentify
 
-# Specify the path to model config and checkpoint file
-config_file_1 = '/root/deIdentification-clp/weights/dino_2044_new_50/dino-5scale_swin-l_8xb2-36e_coco.py'
-# config_file_2 = '/root/mmdetection/configs/clp/effb3_fpn_8xb4-crop896-1x_clp.py'
-# config_file_3 = '/root/mmdetection/configs/clp/dcnv2_clp.py'
-config_file_4 = 'yolo'
-config_list = [config_file_1, config_file_4]
+def parse_args():
+    parser = argparse.ArgumentParser(description='DeIdentify Dataset')
+    parser.add_argument(
+        '--dataset', default="/root/dataset_clp/dataset_2044_new/test_only_one/", help='Test Dataset Path')
+    parser.add_argument('--output', default="/root/deIdentification-clp/result/de_id_result", help='DeID output Directory')
+    parser.add_argument('--gpu', default=0, help='Avaliable GPU Node')
+    args = parser.parse_args()
+    return args
 
-checkpoint_file_1 = '/root/deIdentification-clp/weights/dino_2044_new_50/best_coco_bbox_mAP_epoch_38.pth'
-# checkpoint_file_2 = '/root/mmdetection/work_dirs/effb3_2044_200/epoch_100.pth'
-# checkpoint_file_3 = '/root/mmdetection/work_dirs/dcnv2_2044_200/epoch_100.pth'
-checkpoint_file_4 = '/root/deIdentification-clp/weights/dino_2044_new_50/yolov8/best_1280.pt'
-checkpoint_file_list = [checkpoint_file_1, checkpoint_file_4]
+def cal_mAP(num2class, detections, groundtruths, classes) :
+    # IoU
+    boxA = detections[-1][-1]
+    boxB = groundtruths[-1][-1]
 
-dir_prefix = ''
+    print(f"boxA coordinates : {(boxA)}")
+    print(f"boxA area : {getArea(boxA)}")
+    print(f"boxB coordinates : {(boxB)}")
+    print(f"boxB area : {getArea(boxB)}")
+    print(f"Union area of boxA and boxB : {getUnionAreas(boxA, boxB)}")
+    print(f"Does boxes Intersect? : {boxesIntersect(boxA, boxB)}")
+    print(
+        f"Intersection area of boxA and boxB : {getIntersectionArea(boxA, boxB)}")
+    print(f"IoU of boxA and boxB : {iou(boxA, boxB)}")
 
-final_list = []
-wbf_list = []
-img_boxes_list = []
-img_score_list = []
-img_labels_list = []
+    result = AP(detections, groundtruths, classes)
+
+    for r in result:
+        print("{:^8} AP : {}".format(num2class[str(r['class'])], r['AP']))
+    print("---------------------------")
+    print(f"mAP : {mAP(result)}")
+
+
+def cropping_image(input_dir, output_dir, detections) :
+    dic_bbox_with_point = {}
+    print("Cropping only LicensePlate Bounding Box from Input Image")
+    index = 0
+    for idx, detection in enumerate(tqdm(detections)):
+        file_name, label, conf, box = detection[0], float(
+            detection[1]), float(detection[2]), ast.literal_eval(detection[3])
+        if label == 0:
+            img_path = os.path.join(input_dir, file_name + ".jpg")
+            img = Image.open(img_path)
+            cropped_img = img.crop(box)
+            cropped_img.save(f'{output_dir}{file_name}_crop_{index:04d}.jpg')
+            if file_name in dic_bbox_with_point:
+                dic_bbox_with_point[file_name]['subimage'].append(
+                    f'{file_name}_crop_{index:04d}.jpg')
+                dic_bbox_with_point[file_name]['boxes'].append(box)
+            else:
+                dic_bbox_with_point[file_name] = {'subimage': [
+                    f'{file_name}_crop_{index:04d}.jpg'], 'boxes': [box]}
+            index += 1
+        else:
+            continue
+    print(
+        f"Cropped result images saved at : {output_dir} \nCropped result images cnt : {len(os.listdir(output_dir))}")
+    return dic_bbox_with_point
+
+def point_local2global(result_landmark_detection) :
+    dic_predict = result_landmark_detection
+    keys_to_delete = []
+    for main_img, sub_img in dic_predict.items() :
+        box_list = sub_img['boxes']
+        if 'key_points' not in sub_img :
+            keys_to_delete.append(main_img)
+            continue
+        kp_list = sub_img['key_points']
+        for box, kp in zip(box_list, kp_list) :
+            x1, y1, x2, y2 = box[0], box[1], box[2], box[3]
+            for pt in kp :
+                pt[0] = pt[0] + x1
+                pt[1] = pt[1] + x1
+    for key in keys_to_delete :
+        del dic_predict[key]
+    return dic_predict
+        
 
 if __name__ == '__main__':
-    data_path = '/root/dataset_clp/dataset_2044/test/images/'
-    save_dir = '/root/deIdentification-clp/weighted_box_fusion/result/'
-    crop_save_dir = '/root/deIdentification-clp/clp_landmark_detection/data/dataset/test/'
+    args = parse_args()
+    deid_output = args.output
+    cf.root_testDir = args.dataset
     
-    # weights = [1, 1]
-    # # config_list, checkpoint_file_list 모델의 결과를 추론 및 앙살블
-    # ensemble.ensemble_result(config_list, checkpoint_file_list, data_path=data_path,
-    #                          save_dir=save_dir, 
-    #                          iou_thr=0.5, skip_box_thr=0.0001, sigma=0.1, 
-    #                          weights=weights)
-    # # # 앙상블한 모델의 결과 추론
-    # num2class = {"0.0" : "license-plate", "1.0" : "vehicle"}
-    # # predictPath는 앙상블한 예측 결과가 저장됨
-    # detections, groundtruths, classes = boundingBoxes(labelPath="/root/dataset_clp/dataset_2044_new/test/labels", 
-    #                                               predictPath="/root/deIdentification-clp/weighted_box_fusion/result/predict", 
-    #                                               imagePath="/root/dataset_clp/dataset_2044_new/test/images")
-    # print(detections)
-    # # CSV 파일로 데이터 저장
-    # with open('data.csv', 'w+', newline='') as csvfile:
-    #     csvwriter = csv.writer(csvfile)
-    #     csvwriter.writerows(detections)
-    # print(groundtruths)
-    # print(classes)
-    # # 박스 저장은 안하기에 생략
-    # # boxPlot(detections, "image", savePath="boxed_images/detection")
-    # # boxPlot(groundtruths, "image", savePath="boxed_images/groundtruth")
-    # # boxPlot(detections + groundtruths, "/root/dataset_clp/dataset_2044_new/test/images", 
-    # #         savePath="/root/deIdentification-clp/result/ensemble_result_images")
-    # # IoU
-    # boxA = detections[-1][-1]
-    # boxB = groundtruths[-1][-1]
-
-    # print(f"boxA coordinates : {(boxA)}")
-    # print(f"boxA area : {getArea(boxA)}")
-    # print(f"boxB coordinates : {(boxB)}")
-    # print(f"boxB area : {getArea(boxB)}")
-    # print(f"Union area of boxA and boxB : {getUnionAreas(boxA, boxB)}")
-    # print(f"Does boxes Intersect? : {boxesIntersect(boxA, boxB)}")
-    # print(f"Intersection area of boxA and boxB : {getIntersectionArea(boxA, boxB)}")
-    # print(f"IoU of boxA and boxB : {iou(boxA, boxB)}")
-
-    # result = AP(detections, groundtruths, classes)
-
-    # # print(result)
-
-    # for r in result:
-    #     print("{:^8} AP : {}".format(num2class[str(r['class'])], r['AP']))
-    # print("---------------------------")
-    # print(f"mAP : {mAP(result)}")
+    current_directory = os.getcwd()
+    print("현재 작업 디렉토리:", current_directory)
+    
+    # De-ID Result
+    cfg_en = cf.cfg_ensemble
+    cfg_lm = cf.cfg_landmark
+    rootDir = cf.root_testDir
+    # config_list, checkpoint_file_list 모델의 결과를 추론 및 앙살블
+    ensemble.ensemble_result(cfg_en['configs'], cfg_en['checkpoints'], data_path=cfg_en['input_img'],
+                             save_dir=cfg_en['save_txt_dir'], 
+                             iou_thr=cfg_en['iou_thr'], skip_box_thr=cfg_en['skip_box_thr'], sigma=cfg_en['sigma'], 
+                             weights=cfg_en['weight'])
+    # predictPath는 앙상블한 예측 결과가 저장됨
+    detections, groundtruths, classes = boundingBoxes(labelPath=cfg_en['input_lbl'],
+                                                      predictPath=cfg_en['save_txt_dir'],
+                                                      imagePath=cfg_en['input_img'])
+    cal_mAP(cfg_en['num2class'], detections, groundtruths, classes)
+    # CSV 파일로 데이터 저장
+    with open('ensemble_data.csv', 'w+', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerows(detections)
+        
+    if cfg_en['save_img'] :
+        print(f"Save Result Images at {cfg_en['save_img_dir']}...")
+        boxPlot(detections + groundtruths, cfg_en['input_img'],
+                savePath=cfg_en['save_img_dir'])
+        print(f"Finish to save result images at {cfg_en['save_img_dir']}")
     
     # 차량 + 번호판의 바운딩박스 개수 1006개
-    with open('data.csv', 'r') as csvfile:
+    with open('ensemble_data.csv', 'r') as csvfile:
         csvreader = csv.reader(csvfile)
         detections = list(csvreader)
     
     # detections을 받아서 원본 이미지에서 크롭하기, 
     # boxinfo = [filename, cls, conf, (x1, y1, x2, y2)]
-    dic_bbox_with_point = {}
-    print("Cropping only LicensePlate Bounding Box from Input Image")
-    for idx, detection in enumerate(tqdm(detections)) : 
-        file_name, label, conf, box = detection[0], float(detection[1]), float(detection[2]), ast.literal_eval(detection[3])
-        if label == 0 :
-            img_path = os.path.join(data_path, file_name + ".jpg")
-            img = Image.open(img_path)
-            cropped_img = img.crop(box)
-            cropped_img.save(f'{crop_save_dir}{file_name}_crop_{idx:04d}.jpg')
-            if file_name in dic_bbox_with_point :
-                dic_bbox_with_point[file_name]['subimage'].append(f'{file_name}_crop_{idx:04d}.jpg')
-                dic_bbox_with_point[file_name]['boxes'].append(box)
-            else : 
-                dic_bbox_with_point[file_name] = {'subimage': [
-                    f'{file_name}_crop_{idx:04d}.jpg'], 'boxes': [box]}
-        else : continue
-    print(f"Cropped result images saved at : {crop_save_dir} \nCropped result images cnt : {len(os.listdir(crop_save_dir))}")
-    
-    landmark_output_path = '/root/deIdentification-clp/clp_landmark_detection/results'
-    checkpoint_model = '/root/deIdentification-clp/clp_landmark_detection/weights/Resnet50_Final.pth'
-    landmark_backbone = 'resnet50'  # or mobile0.25
+    dic_bbox_with_point = cropping_image(input_dir=cfg_en['input_img'], output_dir=cfg_lm['input_dir'], detections=detections)
     
     print("Start Landmark Detection...")
-    print(f'Input Landmark Detection Dataset Size : {len(os.listdir(crop_save_dir))}')
-    # 크롭된 이미지를 Plate-Landmarks-detection에 입력으로 넣기 
+    input_cropping = cfg_lm['input_dir']
+    print(f'Input Landmark Detection Dataset Size : {len(os.listdir(input_cropping))}')
     # filename, score, (bx1,by1, bx2,by2), ((x1, y1), (x2, y2), (x3, y3), (x4, y4))
-    landmark_result = landmark.predict(backbone=landmark_backbone, checkpoint_model=checkpoint_model,
-                                        save_img=True, save_txt=True,
-                                        input_path=crop_save_dir,
-                                        output_path=landmark_output_path,
-                                        nms_threshold=0.3, vis_thres=0.5,imgsz=320)
+    landmark_result = landmark.predict(backbone=cfg_lm['backbone'], checkpoint_model=cfg_lm['checkpoint'],
+                                       save_img=cfg_lm['save_img'], save_txt=cfg_lm['save_txt'],
+                                        input_path=cfg_lm['input_dir'],
+                                        output_path=cfg_lm['output_dir'],
+                                        nms_threshold=cfg_lm['nms_thr'], vis_thres=cfg_lm['vis_thres'], imgsz=cfg_lm['imgsz'])
+    # make Dictionary
     file_with_keypoint = {}
     for point in landmark_result :
         file_name, _, bbox, four_point = point[0], point[1], point[2], point[3]
@@ -126,8 +150,8 @@ if __name__ == '__main__':
             file_with_keypoint[org_img_name][file_name] = four_point
         else :
             file_with_keypoint[org_img_name] = {file_name: four_point}
-            
     print("End Landmark Detection!")
+    
     found_nothing = []
     found_nothing_cropped = []
     # dic_bbox_with_point : 원래 이미지, Crop한 이미지와 그에 대한 바운딩 박스 좌표가 들어있는 딕셔너리
@@ -146,14 +170,20 @@ if __name__ == '__main__':
                 else : found_nothing_cropped.append(sub_img)
         else :
             found_nothing.append(key)
+            
     print(f"Detected Nothing from Image : {found_nothing}, Detected Nothing Image Count : {len(found_nothing)}")
     print(f"Detected Nothing from Cropped Image : {found_nothing_cropped}, Detected Nothing Image Count : {len(found_nothing_cropped)}")
     print(f'Result_Img_count after LandmarkDetection : {len(file_with_keypoint)}')
-    with open(('result_landmark_with_box.json'), 'w') as json_file:
+    
+    with open(('result_landmark_with_box.json'), 'w+') as json_file:
         json.dump(dic_bbox_with_point, json_file)
     
-    # 이 때, 이미지 이름을 보존한 채로 Plate-Landmarks-detection의 포인트를 획득 한 뒤 해당 영역에 대한 전체적인 마스크를 그려볼 것
+    with open('result_landmark_with_box.json', 'r') as json_file:
+        dic_bbox_with_point = json.load(json_file)
     
-    # Plate-Landmarks-detection의 결과이미지를 받고 deidentification해서 번호판 붙이기
+    # dic_predict = point_local2global(dic_bbox_with_point)
     
     # 잘랐던 바운딩 박스영역에 deid한 이미지를 붙이기
+    deIdentify(dic_bbox_with_point, cfg_en['input_img'], cfg_lm['input_dir'], deid_output)
+
+    
