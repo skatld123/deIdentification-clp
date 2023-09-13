@@ -17,3 +17,6 @@ pip install -v -e .
 # ensemble install 
 pip install ensemble-boxes
 pip install natsort
+
+# install yolo
+pip install ultralytics
