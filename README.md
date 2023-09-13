@@ -23,6 +23,23 @@ path/to/dataset
      - 00..3.txt
    - test.json
 ```
+## Install
+### Using docker 
+```
+docker pull skatld802/deid-clp:1.0
+```
+
+### Install Directly
+1. clone this project
+```
+git clone https://github.com/skatld123/deIdentification-clp.git
+```
+2. install denpendencies
+```
+cd deIdentification-clp
+sh requirements.sh
+```
+
 
 ## Using
 1. Edit the config file to suit your dataset and path.
@@ -31,5 +48,5 @@ path/to/dataset
 2. Run
 ```Shell
 cd deIdentification-clp
-python main.py --input path/to/dataset --output path/to/saveDir --gpu 0
+python main.py --input path/to/dataset --output path/to/saveDir
 ```
