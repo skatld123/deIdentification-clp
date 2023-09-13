@@ -97,6 +97,7 @@ if __name__ == '__main__':
         
     if cfg_en['save_img'] :
         print(f"Save Result Images at {cfg_en['save_img_dir']}...")
+        if not os.path.exists(cfg_en['save_img']) : os.mkdir(cfg_en['save_img'])
         boxPlot(detections + groundtruths, cfg_en['input_img'],
                 savePath=cfg_en['save_img_dir'])
         print(f"Finish to save result images at {cfg_en['save_img_dir']}")
