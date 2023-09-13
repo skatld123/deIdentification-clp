@@ -26,6 +26,7 @@ def cropping_image(input_dir, output_dir, detections) :
     dic_bbox_with_point = {}
     print("Cropping only LicensePlate Bounding Box from Input Image")
     index = 0
+    if not os.path.exists(output_dir) : os.mkdir(output_dir)
     for idx, detection in enumerate(tqdm(detections)):
         file_name, label, conf, box = detection[0], float(
             detection[1]), float(detection[2]), ast.literal_eval(detection[3])
