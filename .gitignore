@@ -5,4 +5,12 @@
 *.pth
 *.pyc
 !result/.keep
+# test_img
 !virtual-plate/test.jpg
+
+!dataset/
+!dataset/test_only_one/
+!dataset/test_only_one/images
+!dataset/test_only_one/labels
+!dataset/test_only_one/images/20220915_172532_79.jpg
+!dataset/test_only_one/labels/20220915_172532_79.txt
