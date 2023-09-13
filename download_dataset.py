@@ -27,17 +27,17 @@ def extract_Zip(zip_path, output_path):
 
 if __name__ == "__main__":
     google_path = 'https://drive.google.com/uc?id='
-    save_folder = "./data/"
+    
+    dataset_save_folder = "dataset/"
+    dataset = '1Brzu_WIHhyzTDeDGPQXuOWOyFJPkQGp1'
+    dataset_name = 'dataset.zip'
 
-    dataset = '17njZGPSMoaz0QDaHM96r0Jz_2RXoDe8a'
-    dataset_name = 'dataset_2044_new.zip'
+    weights_save_folder = "weights/"
+    weights = '1O5YhXs1GdasLJ0Bv_1ZMGA8XJKSSJNri'
+    weights_name = 'weights.zip'
 
-    # lidar_zip_id = '1IYUkvp6hworm33YVQfYPlRhf2G8hirnu'
-    # lidar_zip = 'lidar.zip'
+    download_Zip(google_path+dataset, dataset_save_folder+dataset_name)
+    download_Zip(google_path+weights, weights_save_folder+weights_name)
 
-    # csv_zip_id = '1HDFKOohrLOkRLGCBqxwe4EFtTZECASO9'
-    # csv_zip = 'csv.zip'
-
-    download_Zip(google_path+dataset, save_folder+dataset_name)
-
-    extract_Zip(save_folder+dataset, save_folder)
+    extract_Zip(dataset_save_folder+dataset, dataset_save_folder)
+    extract_Zip(weights_save_folder+weights_name, weights_save_folder)

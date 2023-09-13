@@ -40,7 +40,6 @@ def deIdentify(result_dir, data_path, crop_path, save_path) :
             cv2.imwrite(os.path.join(save_path, f"output_trans_{idx}.jpg"), output)
             
             cv2.fillConvexPoly(sub_img, dst_pts.astype(np.int32), (0, 0, 0))
-            # cv2.imwrite(os.path.join(save_path, f"bg_{idx}.jpg"), background)
             # 변환된 이미지를 원본 이미지에 적용
             result = cv2.add(sub_img, output)
             cv2.imwrite(os.path.join(save_path, f"output_{idx}.jpg"), result)
