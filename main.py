@@ -5,7 +5,7 @@ import os
 import ast
 import cv2
 from tqdm import tqdm
-from weighted_box_fusion.utils import boundingBoxes, getArea, getUnionAreas, boxesIntersect, getIntersectionArea, iou, AP, mAP, boxPlot
+from weighted_box_fusion.utils import boundingBoxes, cal_mAP, boxPlot
 import weighted_box_fusion.clp_ensemble as ensemble
 import clp_landmark_detection.detect as landmark
 from PIL import Image
@@ -21,29 +21,6 @@ def parse_args():
     parser.add_argument('--gpu', default=0, help='Avaliable GPU Node')
     args = parser.parse_args()
     return args
-
-def cal_mAP(num2class, detections, groundtruths, classes) :
-    # IoU
-    boxA = detections[-1][-1]
-    boxB = groundtruths[-1][-1]
-
-    print(f"boxA coordinates : {(boxA)}")
-    print(f"boxA area : {getArea(boxA)}")
-    print(f"boxB coordinates : {(boxB)}")
-    print(f"boxB area : {getArea(boxB)}")
-    print(f"Union area of boxA and boxB : {getUnionAreas(boxA, boxB)}")
-    print(f"Does boxes Intersect? : {boxesIntersect(boxA, boxB)}")
-    print(
-        f"Intersection area of boxA and boxB : {getIntersectionArea(boxA, boxB)}")
-    print(f"IoU of boxA and boxB : {iou(boxA, boxB)}")
-
-    result = AP(detections, groundtruths, classes)
-
-    for r in result:
-        print("{:^8} AP : {}".format(num2class[str(r['class'])], r['AP']))
-    print("---------------------------")
-    print(f"mAP : {mAP(result)}")
-
 
 def cropping_image(input_dir, output_dir, detections) :
     dic_bbox_with_point = {}

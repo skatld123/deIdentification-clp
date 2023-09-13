@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 
 def deIdentify(result_dir, data_path, crop_path, save_path) :
+    print("Start De-Identification...")
     replacement = cv2.imread('/root/deIdentification-clp/virtual-plate/test.jpg')  # with alpha channel
     for img_name, value in result_dir.items() :
         # 배경 및 배경 마스크 생성
@@ -47,4 +48,5 @@ def deIdentify(result_dir, data_path, crop_path, save_path) :
             background[box[1]:box[3], box[0]:box[2]] = result
         # 결과 이미지 저장
         cv2.imwrite(os.path.join(save_path, img_name + ".jpg"), background)
+    print("Finish De-Identification!")
 

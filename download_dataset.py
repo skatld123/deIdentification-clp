@@ -27,7 +27,7 @@ def extract_Zip(zip_path, output_path):
 
 if __name__ == "__main__":
     google_path = 'https://drive.google.com/uc?id='
-    
+
     dataset_save_folder = "dataset/"
     dataset = '1Brzu_WIHhyzTDeDGPQXuOWOyFJPkQGp1'
     dataset_name = 'dataset.zip'
@@ -35,9 +35,14 @@ if __name__ == "__main__":
     weights_save_folder = "weights/"
     weights = '1O5YhXs1GdasLJ0Bv_1ZMGA8XJKSSJNri'
     weights_name = 'weights.zip'
+    
+    retinaNet_save_folder = "clp_landmark_detection/weights/"
+    retinaNet = '19r-N9ayoYDkP8HMyyiBo8v6Zz8PxHFZ1'
+    retinaNet_name = 'Resnet50_Final.pth'
 
     download_Zip(google_path+dataset, dataset_save_folder+dataset_name)
     download_Zip(google_path+weights, weights_save_folder+weights_name)
+    download_Zip(google_path+retinaNet, retinaNet_save_folder+retinaNet_name)
 
     extract_Zip(dataset_save_folder+dataset, dataset_save_folder)
     extract_Zip(weights_save_folder+weights_name, weights_save_folder)
