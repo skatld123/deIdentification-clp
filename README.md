@@ -33,7 +33,10 @@ docker pull skatld802/deid-clp:1.0
 ```
 docker run -d -it --gpus all --name de_id_clp --ipc=host -v {dataset_path}:{container_dataset_path} skatld802/de-id-clp:1.0
 ```
-
+3. download pretrained weight for lp detection, landmark_detection
+```
+sh download_dataset_and_weight.sh
+```
 
 ### Install Directly
 1. clone this project
