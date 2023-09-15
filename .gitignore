@@ -4,6 +4,9 @@
 *.pt
 *.pth
 *.pyc
+*.txt
+*.json
+*.csv
 !result/.keep
 # test_img
 !virtual-plate/test.jpg
