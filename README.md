@@ -1,4 +1,11 @@
 # De-Identification for Car License Plate
+## System Architecture
+- Detection System using WBF
+![image](https://github.com/skatld123/deIdentification-clp/assets/79092711/0fb71d41-c1cd-4836-a875-11160f245372)
+- De-id System using 4-Point Detection
+![image](https://github.com/skatld123/deIdentification-clp/assets/79092711/a68fe801-3151-449f-8047-4aa3339c0df8)
+
+
 ## Sub Module
 - mmdetection(3.1.0)
 - YOLOv8
