@@ -95,17 +95,18 @@ if __name__ == '__main__':
         csvwriter = csv.writer(csvfile)
         csvwriter.writerows(detections)
         
+    # # 차량 + 번호판의 바운딩박스 개수 1006개
+    # with open('ensemble_data.csv', 'r') as csvfile:
+    #     csvreader = csv.reader(csvfile)
+    #     detections = list(csvreader)
+    
     if cfg_en['save_img'] :
         print(f"Save Result Images at {cfg_en['save_img_dir']}...")
-        if not os.path.exists(cfg_en['save_img']) : os.mkdir(cfg_en['save_img'])
+        os.makedirs(cfg_en['save_img_dir'], exist_ok=True)
         boxPlot(detections + groundtruths, cfg_en['input_img'],
                 savePath=cfg_en['save_img_dir'])
         print(f"Finish to save result images at {cfg_en['save_img_dir']}")
     
-    # 차량 + 번호판의 바운딩박스 개수 1006개
-    with open('ensemble_data.csv', 'r') as csvfile:
-        csvreader = csv.reader(csvfile)
-        detections = list(csvreader)
     
     # detections을 받아서 원본 이미지에서 크롭하기, 
     # boxinfo = [filename, cls, conf, (x1, y1, x2, y2)]

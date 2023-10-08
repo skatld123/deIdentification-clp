@@ -44,8 +44,8 @@ if __name__ == "__main__":
     if not os.path.exists(retinaNet_save_folder) : os.makedirs(retinaNet_save_folder)
 
     # download_Zip(google_path+dataset, dataset_save_folder+dataset_name)
-    download_Zip(google_path+weights, weights_save_folder+weights_name)
-    download_Zip(google_path+retinaNet, retinaNet_save_folder+retinaNet_name)
+    # download_Zip(google_path+weights, weights_save_folder+weights_name)
+    # download_Zip(google_path+retinaNet, retinaNet_save_folder+retinaNet_name)
 
-    # extract_Zip(dataset_save_folder+dataset, dataset_save_folder)
-    extract_Zip(weights_save_folder+weights_name, weights_save_folder)
+    extract_Zip(dataset_save_folder+dataset_name, dataset_save_folder)
+    # extract_Zip(weights_save_folder+weights_name, weights_save_folder)
