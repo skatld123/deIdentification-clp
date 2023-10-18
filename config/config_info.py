@@ -1,29 +1,64 @@
 # config.py
-
 # Input Image 
-root_testDir = '/root/deIdentification-clp/dataset/test/'
+root_testDir = '/root/dataset_clp/dataset_v2/test/'
 ensemble_save_txt = '/root/deIdentification-clp/weighted_box_fusion/result/'
 ensemble_save_img = "/root/deIdentification-clp/result/ensemble/"
 crop_output_dir = '/root/deIdentification-clp/clp_landmark_detection/data/dataset/test/'
 
 # Specify the path to model config and checkpoint file
-config_file_1 = '/root/deIdentification-clp/weights/dino_2044_new_50/dino-5scale_swin-l_8xb2-36e_coco.py'
-config_file_2 = 'yolo'
-config_list = [config_file_1, config_file_2]
+one_stage_output = '/root/deIdentification-clp/result/one_stage_result/'
+two_stage_output = '/root/deIdentification-clp/result/two_stage_result/'
+ensemble_output = '/root/deIdentification-clp/result/ensemble_result/'
 
-checkpoint_file_1 = '/root/deIdentification-clp/weights/dino_2044_new_50/best_coco_bbox_mAP_epoch_38.pth'
-checkpoint_file_2 = '/root/deIdentification-clp/weights/yolov8/best_1280.pt'
-checkpoint_file_list = [checkpoint_file_1, checkpoint_file_2]
-
-cfg_ensemble = {
-    'configs': config_list,
-    'checkpoints': checkpoint_file_list,
+cfg_one = {
+    'configs' : 'yolo',
+    'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_v2_1280.pt',
     'input_img' : root_testDir + "images/",
     'input_lbl' : root_testDir + "labels/",
-    'save_txt_dir': ensemble_save_txt + "predict/",
-    'save_json_dir': ensemble_save_txt,
+    'output_img': one_stage_output + 'images/',
+    'output_lbl': one_stage_output + 'labels/'
+}
+
+# cfg_one = {
+#     'configs' : '/root/deIdentification-clp/weights/dino_v2/dino-5scale_swin-l_8xb2-36e_coco.py',
+#     'checkpoints': '/root/deIdentification-clp/weights/dino_v2/best_coco_bbox_mAP_epoch_29.pth',
+#     'input_img' : root_testDir + "images/",
+#     'input_lbl' : root_testDir + "labels/",
+#     'output_img': one_stage_output + 'images/',
+#     'output_lbl': one_stage_output + 'labels/'
+# }
+
+cfg_crop = {
+    'input' : root_testDir + "images/",
+    'output' : '/root/deIdentification-clp/result/cropped_img/vehicle/images/'
+}
+
+cfg_two = {
+    'configs' : '/root/deIdentification-clp/weights/dino_crop/dino-5scale_swin-l_8xb2-36e_coco.py',
+    'checkpoints': '/root/deIdentification-clp/weights/dino_crop/best_coco_bbox_mAP_epoch_27.pth',
+    'input_img' : '/root/deIdentification-clp/result/cropped_img/vehicle/images/',
+    'input_lbl' : '/root/deIdentification-clp/result/cropped_img/vehicle/labels/',
+    'output_img': two_stage_output + 'images/',
+    'output_lbl' : two_stage_output + 'labels/'
+}
+
+# cfg_two = {
+#     'configs' : 'yolo',
+#     'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_640_crop.pt',
+#     'input_img' : '/root/deIdentification-clp/result/cropped_img/vehicle/images/',
+#     'input_lbl' : '/root/deIdentification-clp/result/cropped_img/vehicle/labels/',
+#     'output_img': two_stage_output + 'images/',
+#     'output_lbl' : two_stage_output + 'labels/',
+#     'num2class' : {"0.0" : "license-plate"}
+# }
+
+cfg_ensemble = {
+    'input_img' : root_testDir + "images/",
+    'input_lbl' : root_testDir + "labels/",
+    'output_lbl': ensemble_output + 'labels/',
+    "output_img" : ensemble_output + 'images/',
+    'output_json': ensemble_output,
     'save_img': False,
-    "save_img_dir" : ensemble_save_img,
     "iou_thr" : 0.5,
     "skip_box_thr" : 0.0001,
     "sigma" : 0.1,
@@ -49,3 +84,6 @@ cfg_landmark = {
     'imgsz' : 320
 }
 
+# yolo-yolo
+# 0.862 -> 0.889 -> 0.918
+# yolo-dino
