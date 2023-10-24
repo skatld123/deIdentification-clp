@@ -84,26 +84,6 @@ def point_local2global(bbox_with_point, detection_result) :
                 # cv2.rectangle(img, (mx1, my1), (mx2, my2), (255,0,0), 4)
         # cv2.imwrite(f"/root/deIdentification-clp/result/{key}.jpg", img)
     return global_dic
-    #         mainImg = cv2.imread(os.path.join(cf.cfg_crop['input'], key + ".jpg"))
-            
-    # # 메인 이미지와 그에 대한 번호판 좌표들로 구성되어야 함 
-    # dic_predict = result_landmark_detection
-    # keys_to_delete = []
-    # for main_img, sub_img in dic_predict.items() :
-    #     box_list = sub_img['boxes']
-    #     if 'key_points' not in sub_img :
-    #         keys_to_delete.append(main_img)
-    #         continue
-    #     kp_list = sub_img['key_points']
-    #     for box, kp in zip(box_list, kp_list) :
-    #         x1, y1, x2, y2 = box[0], box[1], box[2], box[3]
-    #         for pt in kp :
-    #             pt[0] = pt[0] + x1
-    #             pt[1] = pt[1] + x1
-    # for key in keys_to_delete :
-    #     del dic_predict[key]
-    # return dic_predict
-        
 
 if __name__ == '__main__':
     args = parse_args()
@@ -177,7 +157,9 @@ if __name__ == '__main__':
     detections, groundtruths, classes = boundingBoxes(labelPath=cfg_en['input_lbl'],
                                                       predictPath=cfg_en['output_lbl'],
                                                       imagePath=cfg_en['input_img'])
+    
     cal_mAP(cfg_en['num2class'], detections, groundtruths, classes)
+    
     
     if cfg_en['save_img'] :
         print(f"Save Result Images at {cfg_en['output_img']}...")
@@ -185,59 +167,61 @@ if __name__ == '__main__':
         boxPlot(detections + groundtruths, cfg_en['input_img'],
                 savePath=cfg_en['output_img'])
         print(f"Finish to save result images at {cfg_en['output_img']}")
+        
+    dic_bbox_with_point = cropping_image(input_dir=cf.cfg_crop_lp['input'], output_dir=cf.cfg_crop['output'], detections=detections, cls=0, save_img=True)
     
-    # print("Start Landmark Detection...")
-    # input_cropping = cfg_lm['input_dir']
-    # print(f'Input Landmark Detection Dataset Size : {len(os.listdir(input_cropping))}')
-    # # filename, score, (bx1,by1, bx2,by2), ((x1, y1), (x2, y2), (x3, y3), (x4, y4))
-    # landmark_result = landmark.predict(backbone=cfg_lm['backbone'], checkpoint_model=cfg_lm['checkpoint'],
-    #                                    save_img=cfg_lm['save_img'], save_txt=cfg_lm['save_txt'],
-    #                                     input_path=cfg_lm['input_dir'],
-    #                                     output_path=cfg_lm['output_dir'],
-    #                                     nms_threshold=cfg_lm['nms_thr'], vis_thres=cfg_lm['vis_thres'], imgsz=cfg_lm['imgsz'])
-    # # make Dictionary
-    # file_with_keypoint = {}
-    # for point in landmark_result :
-    #     file_name, _, bbox, four_point = point[0], point[1], point[2], point[3]
-    #     org_img_name = file_name.split("_crop_")[0]
-    #     if org_img_name in file_with_keypoint : 
-    #         file_with_keypoint[org_img_name][file_name] = four_point
-    #     else :
-    #         file_with_keypoint[org_img_name] = {file_name: four_point}
-    # print("End Landmark Detection!")
+    print("Start Landmark Detection...")
+    input_cropping = cfg_lm['input_dir']
+    print(f'Input Landmark Detection Dataset Size : {len(os.listdir(input_cropping))}')
+    # filename, score, (bx1,by1, bx2,by2), ((x1, y1), (x2, y2), (x3, y3), (x4, y4))
+    landmark_result = landmark.predict(backbone=cfg_lm['backbone'], checkpoint_model=cfg_lm['checkpoint'],
+                                       save_img=cfg_lm['save_img'], save_txt=cfg_lm['save_txt'],
+                                        input_path=cfg_lm['input_dir'],
+                                        output_path=cfg_lm['output_dir'],
+                                        nms_threshold=cfg_lm['nms_thr'], vis_thres=cfg_lm['vis_thres'], imgsz=cfg_lm['imgsz'])
+    # make Dictionary
+    file_with_keypoint = {}
+    for point in landmark_result :
+        file_name, _, bbox, four_point = point[0], point[1], point[2], point[3]
+        org_img_name = file_name.split("_crop_")[0]
+        if org_img_name in file_with_keypoint : 
+            file_with_keypoint[org_img_name][file_name] = four_point
+        else :
+            file_with_keypoint[org_img_name] = {file_name: four_point}
+    print("End Landmark Detection!")
     
-    # found_nothing = []
-    # found_nothing_cropped = []
-    # # dic_bbox_with_point : 원래 이미지, Crop한 이미지와 그에 대한 바운딩 박스 좌표가 들어있는 딕셔너리
-    # # file_with_keypoint : Landmark Detection을 통해 나온 결과 값들, 원래 이미지, Crop한 이미지와 그에 대한 좌표 존재
-    # # 둘의 원래 이미지 개수가 다르다면 Landmark Detection을 통해 나온 값이 없는 것
-    # for key in dic_bbox_with_point :
-    #     sub_img_list = dic_bbox_with_point[key]['subimage']
-    #     if key in file_with_keypoint :
-    #         key_points_mapping = file_with_keypoint[key]
-    #         for sub_img in sub_img_list :
-    #             if sub_img in key_points_mapping :
-    #                 key_points_list = key_points_mapping[sub_img]
-    #                 if 'key_points' in dic_bbox_with_point[key] :
-    #                     dic_bbox_with_point[key]['key_points'].append(key_points_list)
-    #                 else : dic_bbox_with_point[key]['key_points'] = [key_points_list]
-    #             else : found_nothing_cropped.append(sub_img)
-    #     else :
-    #         found_nothing.append(key)
+    found_nothing = []
+    found_nothing_cropped = []
+    # dic_bbox_with_point : 원래 이미지, Crop한 이미지와 그에 대한 바운딩 박스 좌표가 들어있는 딕셔너리
+    # file_with_keypoint : Landmark Detection을 통해 나온 결과 값들, 원래 이미지, Crop한 이미지와 그에 대한 좌표 존재
+    # 둘의 원래 이미지 개수가 다르다면 Landmark Detection을 통해 나온 값이 없는 것
+    for key in dic_bbox_with_point :
+        sub_img_list = dic_bbox_with_point[key]['subimage']
+        if key in file_with_keypoint :
+            key_points_mapping = file_with_keypoint[key]
+            for sub_img in sub_img_list :
+                if sub_img in key_points_mapping :
+                    key_points_list = key_points_mapping[sub_img]
+                    if 'key_points' in dic_bbox_with_point[key] :
+                        dic_bbox_with_point[key]['key_points'].append(key_points_list)
+                    else : dic_bbox_with_point[key]['key_points'] = [key_points_list]
+                else : found_nothing_cropped.append(sub_img)
+        else :
+            found_nothing.append(key)
             
-    # print(f"Detected Nothing from Image : {found_nothing}, Detected Nothing Image Count : {len(found_nothing)}")
-    # print(f"Detected Nothing from Cropped Image : {found_nothing_cropped}, Detected Nothing Image Count : {len(found_nothing_cropped)}")
-    # print(f'Result_Img_count after LandmarkDetection : {len(file_with_keypoint)}')
+    print(f"Detected Nothing from Image : {found_nothing}, Detected Nothing Image Count : {len(found_nothing)}")
+    print(f"Detected Nothing from Cropped Image : {found_nothing_cropped}, Detected Nothing Image Count : {len(found_nothing_cropped)}")
+    print(f'Result_Img_count after LandmarkDetection : {len(file_with_keypoint)}')
     
-    # with open(('result_landmark_with_box.json'), 'w+') as json_file:
-    #     json.dump(dic_bbox_with_point, json_file)
+    with open(('result_landmark_with_box.json'), 'w+') as json_file:
+        json.dump(dic_bbox_with_point, json_file)
     
-    # with open('result_landmark_with_box.json', 'r') as json_file:
-    #     dic_bbox_with_point = json.load(json_file)
+    with open('result_landmark_with_box.json', 'r') as json_file:
+        dic_bbox_with_point = json.load(json_file)
     
-    # # dic_predict = point_local2global(dic_bbox_with_point)
+    # dic_predict = point_local2global(dic_bbox_with_point)
     
-    # # 잘랐던 바운딩 박스영역에 deid한 이미지를 붙이기
-    # deIdentify(dic_bbox_with_point, cfg_en['input_img'], cfg_lm['input_dir'], deid_output)
+    # 잘랐던 바운딩 박스영역에 deid한 이미지를 붙이기
+    deIdentify(dic_bbox_with_point, cfg_en['input_img'], cfg_lm['input_dir'], deid_output)
 
     

@@ -12,7 +12,7 @@ ensemble_output = '/root/deIdentification-clp/result/ensemble_result/'
 
 cfg_one = {
     'configs' : 'yolo',
-    'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_v2_1280.pt',
+    'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_1280_v2.pt',
     'input_img' : root_testDir + "images/",
     'input_lbl' : root_testDir + "labels/",
     'output_img': one_stage_output + 'images/',
@@ -31,6 +31,11 @@ cfg_one = {
 cfg_crop = {
     'input' : root_testDir + "images/",
     'output' : '/root/deIdentification-clp/result/cropped_img/vehicle/images/'
+}
+
+cfg_crop_lp = {
+    'input' : root_testDir + "images/",
+    'output' : '/root/deIdentification-clp/result/cropped_img/license-plate/images/'
 }
 
 cfg_two = {
