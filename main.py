@@ -98,7 +98,6 @@ if __name__ == '__main__':
     cfg_one = cf.cfg_one
     cfg_two = cf.cfg_two
     cfg_lm = cf.cfg_landmark
-    rootDir = cf.root_testDir
     # YOLO를 사용한 Detection
     result_one = ensemble.detection_result(config=cfg_one['configs'], checkpoint=cfg_one['checkpoints'], 
                               data_path=cfg_one['input_img'], save_dir=cfg_one['output_lbl'], imgsz=1280)
@@ -107,15 +106,6 @@ if __name__ == '__main__':
                                                       predictPath=cfg_one['output_lbl'],
                                                       imagePath=cfg_one['input_img'])
     cal_mAP(cfg_en['num2class'], detections, groundtruths, classes)
-    # # CSV 파일로 데이터 저장
-    # with open('ensemble_data.csv', 'w+', newline='') as csvfile:
-    #     csvwriter = csv.writer(csvfile)
-    #     csvwriter.writerows(detections)
-
-    # # 차량 + 번호판의 바운딩박스 개수 1006개
-    # with open('ensemble_data.csv', 'r') as csvfile:
-    #     csvreader = csv.reader(csvfile)
-    #     detections = list(csvreader)
     
     if cfg_en['save_img'] :
         print(f"Save Result Images at {cfg_one['output_img']}...")
@@ -137,8 +127,8 @@ if __name__ == '__main__':
     result_two = point_local2global(dic_bbox_with_point, result_two)
     
     detections, groundtruths, classes = boundingBoxes_fromDic(labelPath=cfg_one['input_lbl'],
-                                                    save_dic=result_two,
-                                                    imagePath=cfg_one['input_img'])
+                                                    prediction=result_two,
+                                                    imgPath=cfg_one['input_img'])
     cal_mAP(cfg_en['num2class'], detections, groundtruths, classes)
     
     
@@ -149,10 +139,9 @@ if __name__ == '__main__':
                 savePath=cfg_two['output_img'])
         print(f"Finish to save result images at {cfg_two['output_img']}")
     
-    
     # 앙상블 (relative xyxy로 나옴)
     print("Start Ensemble One-stage and Two-stage results")
-    result_ensemble = ensemble.ensemble_result(result_one, result_two, cfg_en['output_lbl'])
+    result_ensemble = ensemble.ensemble_result(result_one, result_two, save_dir=cfg_en['output_lbl'])
     
     detections, groundtruths, classes = boundingBoxes(labelPath=cfg_en['input_lbl'],
                                                       predictPath=cfg_en['output_lbl'],
@@ -160,6 +149,15 @@ if __name__ == '__main__':
     
     cal_mAP(cfg_en['num2class'], detections, groundtruths, classes)
     
+    # # CSV 파일로 데이터 저장
+    # with open('ensemble_data.csv', 'w+', newline='') as csvfile:
+    #     csvwriter = csv.writer(csvfile)
+    #     csvwriter.writerows(detections)
+
+    # # 차량 + 번호판의 바운딩박스 개수 1006개
+    # with open('ensemble_data.csv', 'r') as csvfile:
+    #     csvreader = csv.reader(csvfile)
+    #     detections = list(csvreader)
     
     if cfg_en['save_img'] :
         print(f"Save Result Images at {cfg_en['output_img']}...")
@@ -168,14 +166,14 @@ if __name__ == '__main__':
                 savePath=cfg_en['output_img'])
         print(f"Finish to save result images at {cfg_en['output_img']}")
         
-    dic_bbox_with_point = cropping_image(input_dir=cf.cfg_crop_lp['input'], output_dir=cf.cfg_crop['output'], detections=detections, cls=0, save_img=True)
+    dic_bbox_with_point = cropping_image(input_dir=cf.cfg_crop_lp['input'], output_dir=cf.cfg_crop_lp['output'], detections=detections, cls=0, save_img=True)
     
     print("Start Landmark Detection...")
     input_cropping = cfg_lm['input_dir']
     print(f'Input Landmark Detection Dataset Size : {len(os.listdir(input_cropping))}')
     # filename, score, (bx1,by1, bx2,by2), ((x1, y1), (x2, y2), (x3, y3), (x4, y4))
     landmark_result = landmark.predict(backbone=cfg_lm['backbone'], checkpoint_model=cfg_lm['checkpoint'],
-                                       save_img=cfg_lm['save_img'], save_txt=cfg_lm['save_txt'],
+                                       save_img=True, save_txt=False,
                                         input_path=cfg_lm['input_dir'],
                                         output_path=cfg_lm['output_dir'],
                                         nms_threshold=cfg_lm['nms_thr'], vis_thres=cfg_lm['vis_thres'], imgsz=cfg_lm['imgsz'])
