@@ -39,24 +39,24 @@ cfg_crop_lp = {
     'output' : '/root/deIdentification-clp/result/cropped_img/license-plate/images/'
 }
 
-cfg_two = {
-    'configs' : '/root/deIdentification-clp/weights/dino_crop/dino-5scale_swin-l_8xb2-36e_coco.py',
-    'checkpoints': '/root/deIdentification-clp/weights/dino_crop/best_coco_bbox_mAP_epoch_27.pth',
-    'input_img' : '/root/deIdentification-clp/result/cropped_img/vehicle/images/',
-    'input_lbl' : '/root/deIdentification-clp/result/cropped_img/vehicle/labels/',
-    'output_img': two_stage_output + 'images/',
-    'output_lbl' : two_stage_output + 'labels/'
-}
-
 # cfg_two = {
-#     'configs' : 'yolo',
-#     'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_640_crop.pt',
+#     'configs' : '/root/deIdentification-clp/weights/dino_crop/dino-5scale_swin-l_8xb2-36e_coco.py',
+#     'checkpoints': '/root/deIdentification-clp/weights/dino_crop/best_coco_bbox_mAP_epoch_27.pth',
 #     'input_img' : '/root/deIdentification-clp/result/cropped_img/vehicle/images/',
 #     'input_lbl' : '/root/deIdentification-clp/result/cropped_img/vehicle/labels/',
 #     'output_img': two_stage_output + 'images/',
-#     'output_lbl' : two_stage_output + 'labels/',
-#     'num2class' : {"0.0" : "license-plate"}
+#     'output_lbl' : two_stage_output + 'labels/'
 # }
+
+cfg_two = {
+    'configs' : 'yolo',
+    'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_640_crop.pt',
+    'input_img' : '/root/deIdentification-clp/result/cropped_img/vehicle/images/',
+    'input_lbl' : '/root/deIdentification-clp/result/cropped_img/vehicle/labels/',
+    'output_img': two_stage_output + 'images/',
+    'output_lbl' : two_stage_output + 'labels/',
+    'num2class' : {"0.0" : "license-plate"}
+}
 
 cfg_ensemble = {
     'input_img' : root_testDir + "images/",
