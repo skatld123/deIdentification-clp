@@ -221,5 +221,3 @@ if __name__ == '__main__':
     
     # 잘랐던 바운딩 박스영역에 deid한 이미지를 붙이기
     deIdentify(dic_bbox_with_point, cfg_en['input_img'], cfg_lm['input_dir'], deid_output)
-
-    
