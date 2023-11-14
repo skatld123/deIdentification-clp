@@ -11,4 +11,4 @@ rm /root/deIdentification-clp/result/cropped_img/vehicle/images/*
 
 rm /root/deIdentification-clp/result/de_id_result/*
 rm /root/deIdentification-clp/result/landmark_result/images/*
-# rm /root/deIdentification-clp/result/de_id_result/*
+# rm /root/deIdentification-clp/result/de_id_result/*sadsadas

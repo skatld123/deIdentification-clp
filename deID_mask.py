@@ -3,13 +3,10 @@ import cv2
 import numpy as np
 
 # 입력 디렉토리와 출력 디렉토리 설정
-input_image_dir = '/root/dataset_clp/dataset_v2/valid/images'
-input_label_dir = '/root/dataset_clp/dataset_v2/valid/labels'
-output_dir = '/root/dataset_clp/dataset_v2_mask/valid/images'
+input_image_dir = '/root/dataset_clp/dataset_v2/train/images'
+input_label_dir = '/root/dataset_clp/dataset_v2/train/labels'
+output_dir = '/root/dataset_clp/dataset_v2_mask/train/images'
 
-# 클래스 번호가 0인 객체에 대한 가우시안 블러 파라미터 설정
-blur_kernel_size = (31, 31)  # 블러 커널 크기
-blur_sigma = 80              # 블러 시그마 값
 
 # 출력 디렉토리가 존재하지 않으면 생성
 if not os.path.exists(output_dir):
