@@ -1,7 +1,7 @@
 # config.py
 # Input Image 
 # root_testDir = '/root/dataset_clp/dataset_v2/test/'
-root_testDir = '/root/deIdentification-clp/dataset/test_only_one/'
+root_testDir = '/root/dataset/dataset_v2/'
 ensemble_save_txt = '/root/deIdentification-clp/weighted_box_fusion/result/'
 ensemble_save_img = "/root/deIdentification-clp/result/ensemble/"
 crop_output_dir = '/root/deIdentification-clp/clp_landmark_detection/data/dataset/test/'
