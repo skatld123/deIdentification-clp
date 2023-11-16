@@ -5,12 +5,12 @@ from ultralytics import YOLO
 # model = YOLO('/root/license-plate/640_scale_crop/weights/best.pt')
 # model = YOLO('/root/train_yolo/1280_v2_blur/weights/best.pt')
 # model = YOLO('/root/train_yolo/1280_v2/weights/best.pt')
-model = YOLO('/root/train_yolo/1280_v2_mask/weights/best.pt')
+model = YOLO('/root/deIdentification-clp/weights/yolov8/best_1280_v2_aug_0.935.pt')
 # Validate the model
 # metrics = model.val(data='/root/dataset_clp/dataset_v2_blur/data.yaml', imgsz=1280, batch=16, device=[0,1], split='test',
 #                     save_txt=True, iou=0.5, conf=0.25)  # no arguments needed, dataset and settings remembered
-metrics = model.val(data='/root/dataset_clp/dataset_v2_mask/data.yaml', imgsz=1280, batch=16, device=[0,1], split='test',
-                    save_txt=True, iou=0.5, conf=0.25) 
+metrics = model.val(data='/root/dataset_clp/dataset_v2/data.yaml', imgsz=1280, batch=16, device=[0,1], split='test',
+                    save_txt=False, iou=0.5, conf=0.25) 
 metrics.box.map    # map50-95
 metrics.box.map50  # map50
 metrics.box.map75  # map75

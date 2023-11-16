@@ -132,9 +132,12 @@ def main() :
                         if not os.path.exists(f'{new_lbl_path}_{idx:03d}.txt') :
                             with open(f'{new_lbl_path}_{idx:03d}.txt',"w") as f :
                                 f.write(f'0 {nx} {ny} {nw} {nh}\n')
+                                # 23.11.16 차량 번호판 추가 :
+                                f.write(f'1 0.5 0.5 {0.9} {0.9}\n')
                         else :
                             with open(f'{new_lbl_path}_{idx:03d}.txt',"a") as f :
                                 f.write(f'0 {nx} {ny} {nw} {nh}\n')
+                                f.write(f'1 0.5 0.5 {0.9} {0.9}\n')
                                 
                         if not os.path.exists(f'{new_img_path}_{idx:03d}.jpg') :
                             cv2.imwrite(f'{new_img_path}_{idx:03d}.jpg', crop_img)

@@ -1,22 +1,29 @@
 import argparse
+import ast
 import csv
 import json
 import os
-import ast
-import cv2
-from tqdm import tqdm
-from weighted_box_fusion.utils import boundingBoxes, cal_mAP, boxPlot, convert_scaled_predict
-import weighted_box_fusion.clp_ensemble as ensemble
-import clp_landmark_detection.detect as landmark
-from PIL import Image
-import numpy as np
-import config as cf
-from deId import deIdentify
 
+import clp_landmark_detection.detect as landmark
+import config as cf
+import cv2
+import numpy as np
+import weighted_box_fusion.clp_ensemble as ensemble
+from deId import deIdentify
+from make_detection_result_coco import custom_to_coco_result
+from PIL import Image
+from pycocotools.coco import COCO
+from pycocotools.cocoeval import COCOeval
+from tqdm import tqdm
+from weighted_box_fusion.utils import (boundingBoxes, boxPlot, cal_mAP,
+                                       convert_scaled_predict)
+
+
+# import coco_analyze
 def parse_args():
     parser = argparse.ArgumentParser(description='DeIdentify Dataset')
     parser.add_argument(
-        '--dataset', default="/root/dataset_clp/dataset_2044_new/test_only_one/", help='Test Dataset Path')
+        '--dataset', default="/root/dataset_clp/dataset_v2/test_only_one/", help='Test Dataset Path')
     parser.add_argument('--output', default="/root/deIdentification-clp/result/de_id_result", help='DeID output Directory')
     parser.add_argument('--gpu', default=0, help='Avaliable GPU Node')
     args = parser.parse_args()
@@ -85,6 +92,42 @@ def point_local2global(bbox_with_point, detection_result) :
         # cv2.imwrite(f"/root/deIdentification-clp/result/{key}.jpg", img)
     return global_dic
 
+def coco_evaluate_offline(gt_path, pd_path, output_path) :
+    if os.path.exists(gt_path) :
+        custom_to_coco_result(gt_path, pd_path, output_path)
+    else :
+        print(f"ERROR : gt json file {gt_path} does not exist")
+        return
+    
+    if not os.path.exists(output_path) : 
+        print(f"{output_path} can not found")
+        exit()
+    else :
+        cocoGt=COCO(gt_path)
+        cocoDt=cocoGt.loadRes(output_path)
+        imgIds=sorted(cocoGt.getImgIds())
+        # imgIds=imgIds[0:100]
+        print(f"Start COCO Evaluation.. Image Lenth : {len(imgIds)}")
+        print(f"Ground Truth Json : {gt_path}")
+        print(f"Detection Result Json : {output_path}")
+        imgId = imgIds[np.random.randint(len(imgIds))]
+        # running evaluation
+        cocoEval = COCOeval(cocoGt,cocoDt,"bbox")
+        cocoEval.params.maxDets = [300]
+        print("License-Plate")
+        cocoEval.params.imgIds  = imgIds
+        cocoEval.params.catIds = [1]
+        cocoEval.evaluate()
+        cocoEval.accumulate()
+        cocoEval.summarize_2()
+        
+        print("Vehicle")
+        cocoEval.params.imgIds  = imgIds
+        cocoEval.params.catIds = [2]
+        cocoEval.evaluate()
+        cocoEval.accumulate()
+        cocoEval.summarize_2()
+
 if __name__ == '__main__':
     args = parse_args()
     deid_output = args.output
@@ -99,14 +142,49 @@ if __name__ == '__main__':
     cfg_two = cf.cfg_two
     cfg_lm = cf.cfg_landmark
     rootDir = cf.root_testDir
-    # YOLO를 사용한 Detection
-    result_one = ensemble.detection_result(config=cfg_one['configs'], checkpoint=cfg_one['checkpoints'], 
-                              data_path=cfg_one['input_img'], save_dir=cfg_one['output_lbl'], iou_thr=0.5, imgsz=1280)
+    gt_json_dir = '/root/dataset_clp/dataset_v2/test/test.json'
+    pd_output_json = '/root/deIdentification-clp/result/one_stage_result/test_bbox.json'
+    
+    # # YOLO를 사용한 Detection
+    # result_one = ensemble.detection_result(config=cfg_one['configs'], checkpoint=cfg_one['checkpoints'], 
+    #                           data_path=cfg_one['input_img'], save_dir=cfg_one['output_lbl'], iou_thr=0.5, imgsz=1280)
+    
+    # Using Pycoco
+    pd_path = os.path.abspath(os.path.join(cfg_one['output_lbl'], os.pardir)) + "/result.json" 
+    custom_to_coco_result(gt_json_dir, pd_path, pd_output_json)
+    
+    if not os.path.exists(pd_output_json) : 
+        print(f"{pd_output_json} can not found")
+        exit()
+    else :
+        cocoGt=COCO(gt_json_dir)
+        cocoDt=cocoGt.loadRes(pd_output_json)
+        imgIds=sorted(cocoGt.getImgIds())
+        # imgIds=imgIds[0:100]
+        print(f"Start COCO Evaluation.. Image Lenth : {len(imgIds)}")
+        imgId = imgIds[np.random.randint(len(imgIds))]
+        # running evaluation
+        cocoEval = COCOeval(cocoGt,cocoDt,"bbox")
+        cocoEval.params.maxDets = [300]
+        print("License-Plate")
+        cocoEval.params.catIds = [1]
+        cocoEval.params.imgIds  = imgIds
+        cocoEval.evaluate()
+        cocoEval.accumulate()
+        cocoEval.summarize_2()
+        
+        print("Vehicle")
+        cocoEval.params.catIds = [2]
+        cocoEval.params.imgIds  = imgIds
+        cocoEval.evaluate()
+        cocoEval.accumulate()
+        cocoEval.summarize_2()
+
     # detections의 box좌표는 절대좌표 xyxy
     detections, groundtruths, classes = boundingBoxes(labelPath=cfg_one['input_lbl'],
-                                                      predictPath=cfg_one['output_lbl'],
-                                                      imagePath=cfg_one['input_img'])
-    cal_mAP(cfg_en['num2class'], detections, groundtruths, classes, save_img=True, save_path='/root/deIdentification-clp/result/analysis_result/fp')
+                                                    predictPath=cfg_one['output_lbl'],
+                                                    imagePath=cfg_one['input_img'])
+    cal_mAP(cfg_en['num2class'], detections, groundtruths, classes, save_img=False, save_path='/root/deIdentification-clp/result/analysis_result/fp')
     
     if cfg_en['save_img'] :
         print(f"Save Result Images at {cfg_one['output_img']}...")
