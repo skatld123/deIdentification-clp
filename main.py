@@ -175,7 +175,7 @@ if __name__ == '__main__':
                 savePath=cfg_en['output_img'])
         print(f"Finish to save result images at {cfg_en['output_img']}")
         
-    dic_bbox_with_point = cropping_image(input_dir=cf.cfg_crop_lp['input'], output_dir=cf.cfg_crop_lp['output'], detections=detections, cls=0, save_img=True)
+    dic_bbox_with_point = cropping_image_from_array(input_dir=cf.cfg_crop_lp['input'], output_dir=cf.cfg_crop_lp['output'], detections=detections, cls=0, save_img=True)
     
     print("Start Landmark Detection...")
     input_cropping = cfg_lm['input_dir']
@@ -226,7 +226,7 @@ if __name__ == '__main__':
     with open('result_landmark_with_box.json', 'r') as json_file:
         dic_bbox_with_point = json.load(json_file)
     
-    dic_predict = point_local2global(dic_bbox_with_point)
+    # dic_predict = point_local2global(dic_bbox_with_point, )
     
     # 잘랐던 바운딩 박스영역에 deid한 이미지를 붙이기
     deIdentify_blur_or_mask(dic_bbox_with_point, cfg_en['input_img'], cfg_lm['input_dir'], deid_output, 1)

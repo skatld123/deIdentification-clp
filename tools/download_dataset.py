@@ -33,7 +33,7 @@ if __name__ == "__main__":
     # dataset_name = 'dataset.zip'
     # if not os.path.exists(dataset_save_folder) : os.makedirs(dataset_save_folder)
 
-    weights_save_folder = "/root/deIdentification-clp/weights"
+    weights_save_folder = "/root/deIdentification-clp/weights/"
     weights = '10NhkmOwauDijY7wymt5XMfiWbFX-tnl9'
     weights_name = 'weights.zip'
     if not os.path.exists(weights_save_folder) : os.makedirs(weights_save_folder)

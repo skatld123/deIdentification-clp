@@ -113,20 +113,20 @@ def coco_evaluate_offline(gt_path, pd_path, output_path) :
         imgId = imgIds[np.random.randint(len(imgIds))]
         # running evaluation
         cocoEval = COCOeval(cocoGt,cocoDt,"bbox")
-        cocoEval.params.maxDets = [300]
+        # cocoEval.params.maxDets = [300]
         print("License-Plate")
         cocoEval.params.imgIds  = imgIds
         cocoEval.params.catIds = [1]
         cocoEval.evaluate()
         cocoEval.accumulate()
-        cocoEval.summarize_2()
+        cocoEval.summarize()
         
         print("Vehicle")
         cocoEval.params.imgIds  = imgIds
         cocoEval.params.catIds = [2]
         cocoEval.evaluate()
         cocoEval.accumulate()
-        cocoEval.summarize_2()
+        cocoEval.summarize()
 
 if __name__ == '__main__':
     args = parse_args()

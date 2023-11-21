@@ -4,8 +4,9 @@
 import os
 
 
-root_testDir = '/root/dataset_clp/dataset_v2/test'
-# root_testDir = '/root/deIdentification-clp/dataset/test_only_one'
+# root_testDir = '/root/dataset_clp/dataset_v2/test'
+
+root_testDir = '/root/deIdentification-clp/dataset/test_only_one'
 gt_json_path = os.path.join(root_testDir, "test.json")
 
 # Specify the path to model config and checkpoint file
@@ -15,26 +16,13 @@ ensemble_output = '/root/deIdentification-clp/result/ensemble_result/'
 root_crop = "/root/deIdentification-clp/result/cropped_img"
 
 # YOLOv8
-# cfg_one = {
-#     # AUG_best
-#     'configs' : 'yolo',
-#     'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_1280_v2_aug_0.935.pt',
-#     # ORIGIN 
-#     # 'configs' : 'yolo',
-#     # 'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_1280_v2.pt',
-#     'input_img' : os.path.join(root_testDir, "images/"),
-#     'input_lbl' : os.path.join(root_testDir, "labels/"),
-#     'output_img': os.path.join(one_stage_output, 'images/'),
-#     'output_lbl': os.path.join(one_stage_output, 'labels/'),
-#     'output_json' : os.path.join(one_stage_output, 'result.json'),
-#     'save_img' : False,
-#     'num2class' : {"0.0" : "license-plate", "1.0" : "vehicle"}
-# }
-
-# DINO
 cfg_one = {
-    'configs' : '/root/deIdentification-clp/weights/dino_v2/dino-5scale_swin-l_8xb2-36e_coco.py',
-    'checkpoints': '/root/deIdentification-clp/weights/dino_v2/best_coco_bbox_mAP_epoch_29.pth',
+    # AUG_best
+    'configs' : 'yolo',
+    'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_1280_v2_aug_0.935.pt',
+    # ORIGIN 
+    # 'configs' : 'yolo',
+    # 'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_1280_v2.pt',
     'input_img' : os.path.join(root_testDir, "images/"),
     'input_lbl' : os.path.join(root_testDir, "labels/"),
     'output_img': os.path.join(one_stage_output, 'images/'),
@@ -43,6 +31,19 @@ cfg_one = {
     'save_img' : False,
     'num2class' : {"0.0" : "license-plate", "1.0" : "vehicle"}
 }
+
+# DINO
+# cfg_one = {
+#     'configs' : '/root/deIdentification-clp/weights/dino_v2/dino-5scale_swin-l_8xb2-36e_coco.py',
+#     'checkpoints': '/root/deIdentification-clp/weights/dino_v2/best_coco_bbox_mAP_epoch_29.pth',
+#     'input_img' : os.path.join(root_testDir, "images/"),
+#     'input_lbl' : os.path.join(root_testDir, "labels/"),
+#     'output_img': os.path.join(one_stage_output, 'images/'),
+#     'output_lbl': os.path.join(one_stage_output, 'labels/'),
+#     'output_json' : os.path.join(one_stage_output, 'result.json'),
+#     'save_img' : False,
+#     'num2class' : {"0.0" : "license-plate", "1.0" : "vehicle"}
+# }
 
 cfg_crop = {
     'input' : os.path.join(root_testDir,"images/"),
@@ -69,32 +70,32 @@ cfg_crop_lp = {
 #     'num2class' : {"0.0" : "license-plate"}
 # }
 
-cfg_two = {
-    'configs' : 'yolo',
-    'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_640_crop.pt',
-    'input_img' : os.path.join(cfg_crop['output_dir'], 'images/'),
-    'input_lbl' : os.path.join(cfg_crop['output_dir'], 'labels/'),
-    'input_json' : os.path.join(cfg_crop['output_dir'], 'result.json'),
-    'output_img': os.path.join(two_stage_output, 'images/'),
-    'output_lbl' : os.path.join(two_stage_output, 'labels/'),
-    'output_json' : os.path.join(two_stage_output ,'result.json'),
-    'save_img' : False,
-    'num2class' : {"0.0" : "license-plate"}
-}
-
-# # Swin_aug
 # cfg_two = {
-#     'configs' : '/root/deIdentification-clp/weights/swin_crop_aug/swin_crop.py',
-#     'checkpoints': '/root/deIdentification-clp/weights/swin_crop_aug/best_coco_bbox_mAP_epoch_5.pth',
+#     'configs' : 'yolo',
+#     'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_640_crop.pt',
 #     'input_img' : os.path.join(cfg_crop['output_dir'], 'images/'),
 #     'input_lbl' : os.path.join(cfg_crop['output_dir'], 'labels/'),
 #     'input_json' : os.path.join(cfg_crop['output_dir'], 'result.json'),
 #     'output_img': os.path.join(two_stage_output, 'images/'),
 #     'output_lbl' : os.path.join(two_stage_output, 'labels/'),
 #     'output_json' : os.path.join(two_stage_output ,'result.json'),
-#     'save_img' : True,
+#     'save_img' : False,
 #     'num2class' : {"0.0" : "license-plate"}
 # }
+
+# Swin_aug
+cfg_two = {
+    'configs' : '/root/deIdentification-clp/weights/swin_crop_aug/swin_crop.py',
+    'checkpoints': '/root/deIdentification-clp/weights/swin_crop_aug/best_coco_bbox_mAP_epoch_5.pth',
+    'input_img' : os.path.join(cfg_crop['output_dir'], 'images/'),
+    'input_lbl' : os.path.join(cfg_crop['output_dir'], 'labels/'),
+    'input_json' : os.path.join(cfg_crop['output_dir'], 'result.json'),
+    'output_img': os.path.join(two_stage_output, 'images/'),
+    'output_lbl' : os.path.join(two_stage_output, 'labels/'),
+    'output_json' : os.path.join(two_stage_output ,'result.json'),
+    'save_img' : True,
+    'num2class' : {"0.0" : "license-plate"}
+}
 
 cfg_ensemble = {
     'input_img' : os.path.join(root_testDir, "images/"),
@@ -113,12 +114,12 @@ cfg_ensemble = {
 
 # LandmarkDetection
 landmark_output_path = '/root/deIdentification-clp/clp_landmark_detection/results/'
-lm_checkpoint_model = '/root/deIdentification-clp/clp_landmark_detection/weights/Resnet50_Final.pth'
+lm_checkpoint_model = '/root/deIdentification-clp/weights/retinanet/Resnet50_Final.pth'
 landmark_backbone = 'resnet50'  # or mobile0.25
 
 cfg_landmark = {
     'backbone': 'resnet50', # or mobile0.25
-    'checkpoint' : '/root/deIdentification-clp/weights/Resnet50_Final.pth',
+    'checkpoint' : '/root/deIdentification-clp/weights/retinanet/Resnet50_Final.pth',
     'input_dir': cfg_crop_lp['output'],
     'output_dir': '/root/deIdentification-clp/result/landmark_result/',
     'checkpoint': lm_checkpoint_model,

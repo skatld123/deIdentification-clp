@@ -97,19 +97,20 @@ def deIdentify_blur_or_mask(result_dir, data_path, crop_path, save_path, metric=
                 if metric == 1 :
                     blur_kernel_size = (31, 31)  # 블러 커널 크기
                     blur_sigma = 80              # 블러 시그마 값
+                    # 가우시안 블러 적용
                     output = cv2.GaussianBlur(output, blur_kernel_size, blur_sigma)
+                    # 마스크를 사용하여 원본 이미지와 블러 이미지 병합
                 elif metric ==2 : 
-                    output = np.zeros((sw, sh), np.uint8)
+                    output = np.zeros((sh, sw, 3), np.uint8)
                 else : 
                     output = cv2.GaussianBlur(output, (5, 5), 0)
                 
-                output = cv2.cvtColor(output, cv2.COLOR_BGR2HSV)
-                # 명도 채도 색상 조정
-                output[:, :, 0] = h
-                output[:, :, 1] = s
-                
-                output = cv2.cvtColor(output, cv2.COLOR_HSV2BGR)
-                # cv2.imwrite(os.path.join(save_path, f"output_trans_{idx}.jpg"), output)
+                    output = cv2.cvtColor(output, cv2.COLOR_BGR2HSV)
+                    # 명도 채도 색상 조정
+                    output[:, :, 0] = h
+                    output[:, :, 1] = s
+                    output = cv2.cvtColor(output, cv2.COLOR_HSV2BGR)
+                cv2.imwrite(os.path.join(save_path, f"output_trans_{idx}.jpg"), output)
                 
                 cv2.fillConvexPoly(sub_img, dst_pts.astype(np.int32), (0, 0, 0))
                 # 변환된 이미지를 원본 이미지에 적용

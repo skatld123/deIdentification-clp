@@ -16,7 +16,7 @@ def cropping_image_from_array(input_dir, output_dir, detections, cls, save_img) 
     if os.listdir(input_dir) == 0 : 
         print(f"ERROR : Empty Cropped directory : {input_dir}")
         return
-    if not os.path.exists(output_dir) : os.mkdir(output_dir)
+    os.makedirs(output_dir, exist_ok=True)
     for idx, detection in enumerate(tqdm(detections)):
         # 박스 변환
         if isinstance(detection[3], tuple) : box = list(detection[3])
