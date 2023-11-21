@@ -28,24 +28,24 @@ def extract_Zip(zip_path, output_path):
 if __name__ == "__main__":
     google_path = 'https://drive.google.com/uc?id='
 
-    dataset_save_folder = "dataset/"
-    dataset = '1Brzu_WIHhyzTDeDGPQXuOWOyFJPkQGp1'
-    dataset_name = 'dataset.zip'
-    if not os.path.exists(dataset_save_folder) : os.makedirs(dataset_save_folder)
+    # dataset_save_folder = "dataset/"
+    # dataset = '1Brzu_WIHhyzTDeDGPQXuOWOyFJPkQGp1'
+    # dataset_name = 'dataset.zip'
+    # if not os.path.exists(dataset_save_folder) : os.makedirs(dataset_save_folder)
 
-    weights_save_folder = "weights/"
-    weights = '1O5YhXs1GdasLJ0Bv_1ZMGA8XJKSSJNri'
+    weights_save_folder = "/root/deIdentification-clp/weights"
+    weights = '10NhkmOwauDijY7wymt5XMfiWbFX-tnl9'
     weights_name = 'weights.zip'
     if not os.path.exists(weights_save_folder) : os.makedirs(weights_save_folder)
     
-    retinaNet_save_folder = "clp_landmark_detection/weights/"
-    retinaNet = '19r-N9ayoYDkP8HMyyiBo8v6Zz8PxHFZ1'
-    retinaNet_name = 'Resnet50_Final.pth'
-    if not os.path.exists(retinaNet_save_folder) : os.makedirs(retinaNet_save_folder)
+    # retinaNet_save_folder = "clp_landmark_detection/weights/"
+    # retinaNet = '19r-N9ayoYDkP8HMyyiBo8v6Zz8PxHFZ1'
+    # retinaNet_name = 'Resnet50_Final.pth'
+    # if not os.path.exists(retinaNet_save_folder) : os.makedirs(retinaNet_save_folder)
 
     # download_Zip(google_path+dataset, dataset_save_folder+dataset_name)
-    # download_Zip(google_path+weights, weights_save_folder+weights_name)
+    download_Zip(google_path+weights, weights_save_folder+weights_name)
     # download_Zip(google_path+retinaNet, retinaNet_save_folder+retinaNet_name)
 
-    extract_Zip(dataset_save_folder+dataset_name, dataset_save_folder)
-    # extract_Zip(weights_save_folder+weights_name, weights_save_folder)
+    # extract_Zip(dataset_save_folder+dataset_name, dataset_save_folder)
+    extract_Zip(weights_save_folder+weights_name, weights_save_folder)
