@@ -5,7 +5,6 @@ import os
 
 
 # root_testDir = '/root/dataset_clp/dataset_v2/test'
-
 root_testDir = '/root/deIdentification-clp/dataset/test_only_one'
 gt_json_path = os.path.join(root_testDir, "test.json")
 
