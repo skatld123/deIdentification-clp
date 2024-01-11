@@ -21,7 +21,8 @@ class HTML:
         """
         self.title = title
         self.web_dir = web_dir
-        self.img_dir = os.path.join(self.web_dir, 'images')
+        # self.img_dir = os.path.join(self.web_dir, 'images')
+        self.img_dir = os.path.join(self.web_dir)
         if not os.path.exists(self.web_dir):
             os.makedirs(self.web_dir)
         if not os.path.exists(self.img_dir):

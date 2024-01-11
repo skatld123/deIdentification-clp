@@ -27,23 +27,27 @@ See training and test tips at: https://github.com/junyanz/pytorch-CycleGAN-and-p
 See frequently asked questions at: https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/docs/qa.md
 """
 import os
-from options.test_options import TestOptions
-from data import create_dataset
-from models import create_model
-from util.visualizer import save_images
-from util import html
+from transform_gan.options.test_options import TestOptions
+from transform_gan.data import create_dataset
+from transform_gan.models import create_model
+from transform_gan.util.visualizer import save_images
+from transform_gan.util import html
 
 try:
     import wandb
 except ImportError:
     print('Warning: wandb package cannot be found. The option "--use_wandb" will result in error.')
 
-def transform(dataroot, gpu_ids, results_dir, num_test) : 
+def transform(dataroot, gpu_ids, results_dir, num_test, checkpoints_dir) : 
     opt = TestOptions().parse()  # get test options
-    opt.model = "cycle_gan"
+    opt.model = "test"
+    opt.name = "license-plate_cyclegan_lsgan_v2"
     opt.dataroot = dataroot
     opt.project_name = "deid"
     opt.gpu_ids = gpu_ids
+    opt.no_dropout = True
+    opt.direction = "AtoB"
+    opt.checkpoints_dir = checkpoints_dir
     opt.phase = 'test'
     opt.results_dir = results_dir
     opt.num_test = num_test
@@ -58,6 +62,15 @@ def transform(dataroot, gpu_ids, results_dir, num_test) :
     model.setup(opt)  
     if opt.eval:
         model.eval()
+        
+    # create a website
+    # 최종 저장되는 디렉토리
+    web_dir = opt.results_dir
+    if opt.load_iter > 0:  # load_iter is 0 by default
+        web_dir = '{:s}_iter{:d}'.format(web_dir, opt.load_iter)
+    print('creating web directory', web_dir)
+    webpage = html.HTML(web_dir, 'Experiment = %s, Phase = %s, Epoch = %s' % (opt.name, opt.phase, opt.epoch))
+    
     for i, data in enumerate(dataset):
         if i >= opt.num_test:  # only apply our model to opt.num_test images.
             break

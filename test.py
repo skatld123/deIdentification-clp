@@ -12,23 +12,22 @@ from PIL import Image
 import numpy as npcond
 import config as cf
 from deId import deIdentify_blur_or_mask, deIdentify
-from analysis_result import coco_evaluate_offline
 from utils.crop import cropping_image_from_array, convert_row_from_csv
 
 def parse_args():
     parser = argparse.ArgumentParser(description='DeIdentify Dataset')
     parser.add_argument(
         '--dataset', default="/root/dataset_clp/dataset_v2/test_only_one/", help='Test Dataset Path')
-    parser.add_argument('--output', default="/root/deIdentification-clp/result/de_id_result", help='DeID output Directory')
+    parser.add_argument('--output', default="/root/deIdentification-clp/result/de_id_result/license_plate", help='DeID output Directory')
     parser.add_argument('--gpu', default=0, help='Avaliable GPU Node')
     args = parser.parse_args()
     return args
 
 def point_local2global(bbox_with_point, detection_result, save_dir) :
     '''
-    bbox_with_point : 박스와 좌표가 포함되어 있는 dictionary
-    detection_result : 검출 결과
-    save_dir : global 좌표로 변환된 dic을 저장할 json_path
+    bbox_with_point : 박스와 좌표가 포함되어 있는 dictionary \n
+    detection_result : 검출 결과 \n
+    save_dir : global 좌표로 변환된 dic을 저장할 json_path \n
     '''
     # detection result xyxy임
     global_dic = {}
@@ -148,7 +147,6 @@ if __name__ == '__main__':
     print("AP of ENSEMBLE")
     cal_mAP(cfg_en['num2class'], detections, groundtruths, classes)
     result_json_path = cf.two_stage_output + "/result_coco.json"
-    coco_evaluate_offline(gt_path=cfg_en['input_json'], pd_path=cfg_en['output_json'], output_path=result_json_path)
     
     # CSV 파일로 데이터 저장
     with open('ensemble_data.csv', 'w+', newline='') as csvfile:
@@ -217,8 +215,11 @@ if __name__ == '__main__':
     
     with open('result_landmark_with_box.json', 'r') as json_file:
         dic_bbox_with_point = json.load(json_file)
-    
-    dic_predict = point_local2global(dic_bbox_with_point)
-    
+    # 여기 수정 필요
+    # dic_predict = point_local2global(dic_bbox_with_point, detection_result)
+    deIdentify_blur_or_mask(dic_bbox_with_point, cfg_en['input_img'], cfg_lm['input_dir'], deid_output, metric=3)
     # 잘랐던 바운딩 박스영역에 deid한 이미지를 붙이기
-    deIdentify(dic_bbox_with_point, cfg_en['input_img'], cfg_lm['input_dir'], deid_output)
+    checkpoints_dir = "/root/deIdentification-clp/weights/cyclegan"
+    final_dir = '/root/deIdentification-clp/result/de_id_result'
+    tflp_path = '/root/deIdentification-clp/result/de_id_result/tf_lp'
+    deIdentify(dic_bbox_with_point, deid_output, cfg_en['input_img'], tflp_path, final_dir, checkpoints_dir)
