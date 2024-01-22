@@ -1,27 +1,21 @@
 import argparse
+import ast
 import csv
 import json
 import os
-import ast
-import cv2
-from tqdm import tqdm
-from weighted_box_fusion.utils import boundingBoxes, cal_mAP, boxPlot, convert_scaled_predict, boundingBoxes_fromDic
-import weighted_box_fusion.clp_ensemble as ensemble
-import clp_landmark_detection.detect as landmark
-from PIL import Image
-import numpy as npcond
-import config as cf
-from deId import deIdentify_blur_or_mask, deIdentify
-from utils.crop import cropping_image_from_array, convert_row_from_csv
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='DeIdentify Dataset')
-    parser.add_argument(
-        '--dataset', default="/root/dataset_clp/dataset_v2/test_only_one/", help='Test Dataset Path')
-    parser.add_argument('--output', default="/root/deIdentification-clp/result/de_id_result/license_plate", help='DeID output Directory')
-    parser.add_argument('--gpu', default=0, help='Avaliable GPU Node')
-    args = parser.parse_args()
-    return args
+import clp_landmark_detection.detect as landmark
+import config as cf
+import cv2
+import numpy as npcond
+import weighted_box_fusion.clp_ensemble as ensemble
+from PIL import Image
+from tqdm import tqdm
+from utils.crop import convert_row_from_csv, cropping_image_from_array
+from utils.deId import deIdentify, deIdentify_blur_or_mask
+from weighted_box_fusion.utils import (boundingBoxes, boundingBoxes_fromDic,
+                                       boxPlot, cal_mAP,
+                                       convert_scaled_predict)
 
 def point_local2global(bbox_with_point, detection_result, save_dir) :
     '''
@@ -56,27 +50,23 @@ def point_local2global(bbox_with_point, detection_result, save_dir) :
                     global_dic[key]['labels'].append(label)
                 else : 
                     global_dic[key] = {'boxes' : [[mx1, my1, mx2, my2]], 'scores' : [score], 'labels' : [label]}
-        #         cv2.rectangle(img, (mx1, my1), (mx2, my2), (255,0,0), 4)
-        # cv2.imwrite(f"/root/deIdentification-clp/result/{key}.jpg", img)
     with open(save_dir, 'w') as json_file:
         json.dump(global_dic, json_file)
     return global_dic
 
 if __name__ == '__main__':
-    args = parse_args()
-    deid_output = args.output
-    cf.root_testDir = args.dataset
-    
+    deid_output = "/root/deIdentification-clp/result/de_id_result/virtual_lp"
+    root_testDir = "/root/dataset_clp/dataset_v2/test_only_one/"
     current_directory = os.getcwd()
     print("현재 작업 디렉토리:", current_directory)
     
-    # De-ID Result
+    # Load config
     cfg_en = cf.cfg_ensemble
     cfg_one = cf.cfg_one
     cfg_two = cf.cfg_two
     cfg_lm = cf.cfg_landmark
 
-    # YOLO를 사용한 Detection
+    # 1-Stage Detection
     result_one = ensemble.detection_result(config=cfg_one['configs'], 
                                         checkpoint=cfg_one['checkpoints'], 
                                         data_path=cfg_one['input_img'], 
@@ -97,7 +87,6 @@ if __name__ == '__main__':
     
     # detections을 받아서 원본 이미지에서 크롭하기, 
     # boxinfo = [filename, cls, conf, (x1, y1, x2, y2)]
-    # 크롭 이미지와 그에 대한 좌표값이 필요 -> 그 좌표값을 전체 이미지에서의 좌표값을호 변환필욧
     dic_bbox_with_point = cropping_image_from_array(input_dir=cf.cfg_crop['input'], output_dir=cf.cfg_crop['output'], detections=detections, cls=1, save_img=True)
     
     box_point_json_path = os.path.join(cf.cfg_crop['output_dir'], 'box_with_point.json')
@@ -118,6 +107,7 @@ if __name__ == '__main__':
     detections, groundtruths, classes = boundingBoxes_fromDic(labelPath=cfg_one['input_lbl'],
                                                     prediction=result_two,
                                                     imgPath=cfg_one['input_img'])
+    
     groundtruths_lp = [item for item in groundtruths if item[1] == 0.0]
     cal_mAP(cfg_two['num2class'], detections, groundtruths_lp, [0.0])
     
@@ -127,13 +117,12 @@ if __name__ == '__main__':
         boxPlot(boxlist=detections + groundtruths_lp, imagePath=cfg_one['input_img'],
                 savePath=cfg_two['output_img'])
         print(f"Finish to save result images at {cfg_two['output_img']}")
-        
     
     # if result_two is None or result_one is None : 
-    with open('/root/deIdentification-clp/result/one_stage_result/result.json', "r") as json_file:
+    with open(os.path.join(cf.two_stage_output, 'result.json'), "r") as json_file:
         result_one = json.load(json_file)
     
-    with open('/root/deIdentification-clp/result/two_stage_result/result.json', "r") as json_file:
+    with open(os.path.join(cf.two_stage_output, 'result.json'), "r") as json_file:
         result_two = json.load(json_file)
     
     # 앙상블 (relative xyxy로 나옴) 결과 파일을 사용
@@ -146,15 +135,14 @@ if __name__ == '__main__':
     
     print("AP of ENSEMBLE")
     cal_mAP(cfg_en['num2class'], detections, groundtruths, classes)
-    result_json_path = cf.two_stage_output + "/result_coco.json"
     
     # CSV 파일로 데이터 저장
-    with open('ensemble_data.csv', 'w+', newline='') as csvfile:
+    with open(os.path.join(cf.ensemble_output, 'ensemble_data.csv'), 'w+', newline='') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerows(detections)
 
     # 차량 + 번호판의 바운딩박스 개수 1006개
-    with open('ensemble_data.csv', 'r') as csvfile:
+    with open(os.path.join(cf.ensemble_output, 'ensemble_data.csv'), 'r') as csvfile:
         csvreader = csv.reader(csvfile)
         detections = [convert_row_from_csv(row) for row in csvreader]
     
@@ -217,9 +205,9 @@ if __name__ == '__main__':
         dic_bbox_with_point = json.load(json_file)
     # 여기 수정 필요
     # dic_predict = point_local2global(dic_bbox_with_point, detection_result)
-    deIdentify_blur_or_mask(dic_bbox_with_point, cfg_en['input_img'], cfg_lm['input_dir'], deid_output, metric=3)
+    vlp_path = deIdentify_blur_or_mask(dic_bbox_with_point, cfg_en['input_img'], cfg_lm['input_dir'], deid_output, metric=3)
     # 잘랐던 바운딩 박스영역에 deid한 이미지를 붙이기
     checkpoints_dir = "/root/deIdentification-clp/weights/cyclegan"
     final_dir = '/root/deIdentification-clp/result/de_id_result'
     tflp_path = '/root/deIdentification-clp/result/de_id_result/tf_lp'
-    deIdentify(dic_bbox_with_point, deid_output, cfg_en['input_img'], tflp_path, final_dir, checkpoints_dir)
+    deIdentify(dic_bbox_with_point, vlp_path, cfg_en['input_img'], tflp_path, final_dir, checkpoints_dir)

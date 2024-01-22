@@ -29,7 +29,8 @@ def changeFormat(label_path, save_path) :
         info = f'{cls} {conf} {nx} {ny} {nw} {nh}\n'
         f.write(info)
         
-        
-label_path = '/root/deIdentification-clp/result/ensemble_result/labels'
-save_path = '/root/deIdentification-clp/result/ensemble_result/labels_abs'
-changeFormat(label_path, save_path)
+
+if __name__ == '__main__' : 
+    label_path = '/root/deIdentification-clp/result/ensemble_result/labels'
+    save_path = '/root/deIdentification-clp/result/ensemble_result/labels_abs'
+    changeFormat(label_path, save_path)

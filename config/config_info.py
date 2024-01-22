@@ -19,9 +19,6 @@ cfg_one = {
     # AUG_best
     'configs' : 'yolo',
     'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_1280_v2_aug_0.935.pt',
-    # ORIGIN 
-    # 'configs' : 'yolo',
-    # 'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_1280_v2.pt',
     'input_img' : os.path.join(root_testDir, "images/"),
     'input_lbl' : os.path.join(root_testDir, "labels/"),
     'output_img': os.path.join(one_stage_output, 'images/'),
@@ -31,18 +28,6 @@ cfg_one = {
     'num2class' : {"0.0" : "license-plate", "1.0" : "vehicle"}
 }
 
-# DINO
-# cfg_one = {
-#     'configs' : '/root/deIdentification-clp/weights/dino_v2/dino-5scale_swin-l_8xb2-36e_coco.py',
-#     'checkpoints': '/root/deIdentification-clp/weights/dino_v2/best_coco_bbox_mAP_epoch_29.pth',
-#     'input_img' : os.path.join(root_testDir, "images/"),
-#     'input_lbl' : os.path.join(root_testDir, "labels/"),
-#     'output_img': os.path.join(one_stage_output, 'images/'),
-#     'output_lbl': os.path.join(one_stage_output, 'labels/'),
-#     'output_json' : os.path.join(one_stage_output, 'result.json'),
-#     'save_img' : False,
-#     'num2class' : {"0.0" : "license-plate", "1.0" : "vehicle"}
-# }
 
 cfg_crop = {
     'input' : os.path.join(root_testDir,"images/"),
@@ -54,33 +39,6 @@ cfg_crop_lp = {
     'input' : os.path.join(root_testDir, "images/"),
     'output' : os.path.join(root_crop, 'license-plate','images')
 }
-
-# # DINO_CROP_AUG
-# cfg_two = {
-#     'configs' : '/root/deIdentification-clp/weights/dino_crop_aug/dino_crop.py',
-#     'checkpoints': '/root/deIdentification-clp/weights/dino_crop_aug/best_coco_bbox_mAP_epoch_16.pth',
-#     'input_img' : os.path.join(cfg_crop['output_dir'], 'images/'),
-#     'input_lbl' : os.path.join(cfg_crop['output_dir'], 'labels/'),
-#     'input_json' : os.path.join(cfg_crop['output_dir'], 'result.json'),
-#     'output_img': os.path.join(two_stage_output, 'images/'),
-#     'output_lbl' : os.path.join(two_stage_output, 'labels/'),
-#     'output_json' : os.path.join(two_stage_output ,'result.json'),
-#     'save_img' : True,
-#     'num2class' : {"0.0" : "license-plate"}
-# }
-
-# cfg_two = {
-#     'configs' : 'yolo',
-#     'checkpoints': '/root/deIdentification-clp/weights/yolov8/best_640_crop.pt',
-#     'input_img' : os.path.join(cfg_crop['output_dir'], 'images/'),
-#     'input_lbl' : os.path.join(cfg_crop['output_dir'], 'labels/'),
-#     'input_json' : os.path.join(cfg_crop['output_dir'], 'result.json'),
-#     'output_img': os.path.join(two_stage_output, 'images/'),
-#     'output_lbl' : os.path.join(two_stage_output, 'labels/'),
-#     'output_json' : os.path.join(two_stage_output ,'result.json'),
-#     'save_img' : False,
-#     'num2class' : {"0.0" : "license-plate"}
-# }
 
 # Swin_aug
 cfg_two = {
@@ -127,6 +85,9 @@ cfg_landmark = {
     'imgsz' : 320
 }
 
-# yolo-yolo
-# 0.862 -> 0.889 -> 0.918
-# yolo-dino
+cfg_cyclegan = {
+    'input_dir': cfg_crop_lp['output'],
+    'output_dir': '/root/deIdentification-clp/result/de_id_result',
+    'checkpoint' : '/root/deIdentification-clp/weights/cyclegan',
+
+}

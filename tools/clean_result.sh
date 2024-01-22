@@ -1,0 +1,1 @@
+rm /root/deIdentification-clp/result/*

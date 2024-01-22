@@ -69,10 +69,13 @@ def boxesIntersect(boxA, boxB):
         return False  # boxA is below boxB
     return True
 
-def main() :
-    input_img_dir = "/root/dataset_clp/dataset_v2/test"
-    output_img_dir = "/root/dataset_clp/crop_dataset/test"
-    
+def crop_vehicle_image(input_img_dir, output_img_dir) :
+    """
+    Crop Vehicle Area from image directory
+    :param input_img_dir: Input_img_dir
+    :param output_img_dir: Onput_img_dir
+    """
+
     os.makedirs(output_img_dir, exist_ok=True)
     
     if not os.path.exists(input_img_dir) :
@@ -148,4 +151,6 @@ def main() :
         print("이미지 개수와 라벨 개수가 다릅니다.")
 
 if __name__ == '__main__' : 
-    main()
+    input_img_dir = "/root/dataset_clp/dataset_v2/test"
+    output_img_dir = "/root/dataset_clp/crop_dataset/test"
+    crop_vehicle_image(input_img_dir, output_img_dir)

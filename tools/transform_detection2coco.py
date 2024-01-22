@@ -1,6 +1,10 @@
 import json
 import os 
 
+"""
+    기존의 검출 결과 형식을 COCO Evalution을 위한 형식으로 변경하는 코드
+"""
+
 def custom_to_coco_result(label_path, predict_path, output_path) :
     detection_result_coco = []
     with open(label_path, "r") as json_file:
