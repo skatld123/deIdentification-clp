@@ -1,20 +1,23 @@
 # De-Identification for Car License Plate
 ## System Architecture
-- Detection System using WBF
-![image](https://github.com/skatld123/deIdentification-clp/assets/79092711/5e16590a-375c-4c54-b066-9cf11bc1a1fa)
-- De-id System using 4-Point Detection
-![image](https://github.com/skatld123/deIdentification-clp/assets/79092711/a68fe801-3151-449f-8047-4aa3339c0df8)
-
+- Licnense Plate Detection Architecture using WBF
+![검출구조](https://github.com/skatld123/deIdentification-clp/assets/79092711/e6a42ecd-d819-4340-ab39-e0b479d07ed9)
+- De-identification Architecture
+![비식별화 과정_수정](https://github.com/skatld123/deIdentification-clp/assets/79092711/311ff446-a989-4d64-8fb1-20882cea7ed5)
 
 ## Sub Module
 - mmdetection(3.1.0)
 - YOLOv8
 - RetinaNet(for using CLP Landmark detection)
-- De-Id(openCV)
+- De-Id(CycleGAN)
 
 ## Prepare
-- Put your weights file in the weights path
-- Prepare the dataset in the following format (txt->YOLO, json->COCO)
+- Put your weights file in the weights path.
+```
+sh /root/deIdentification-clp/tools/download_dataset_and_weight.sh
+```
+- Prepare the dataset in the following format. (txt->YOLO, json->COCO)
+- When testing only, the label is not essential.
 ```
 path/to/dataset
  - train
@@ -45,7 +48,7 @@ docker run -d -it --gpus all --name de_id_clp --ipc=host -v {dataset_path}:{cont
 sh download_dataset_and_weight.sh
 ```
 
-### Install Directly
+## Install Directly
 1. clone this project
 ```
 git clone https://github.com/skatld123/deIdentification-clp.git
@@ -55,6 +58,7 @@ git clone https://github.com/skatld123/deIdentification-clp.git
 cd deIdentification-clp
 sh requirements.sh
 ```
+3. You may need to install the cycleGAN dependency, if that's the case, please install the dependency recommended by [CycleGAN-Pytorch](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix).
 
 
 ## Using
@@ -64,5 +68,10 @@ sh requirements.sh
 2. Run
 ```Shell
 cd deIdentification-clp
-python main.py --input path/to/dataset --output path/to/saveDir
+python test.py
 ```
+
+### Reference
+- Detection : [mmdetection](https://github.com/open-mmlab/mmdetection), [yolov8](https://github.com/ultralytics/ultralytics), [WBF](https://github.com/ZFTurbo/Weighted-Boxes-Fusion)
+- [Virtual License Plate Image](https://github.com/Oh-JongJin/Virtual_Number_Plate)
+- [CycleGAN-Pytorch](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix)
