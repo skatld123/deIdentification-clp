@@ -1,6 +1,10 @@
 import os
 from PIL import Image
 
+"""
+    YOLO의 Detection 결과를 이용하여 False Positive를 자르고 저장하는 코드 
+"""
+
 # 이미지와 annotation 디렉토리 경로
 image_dir = '/root/dataset_clp/dataset_2044_new/test/images/'
 annotation_dir = '/usr/src/app/runs/val/exp6_0.5/labels/'

@@ -1,2 +1,2 @@
 pip install gdown
-python download_dataset.py
+python tools/download_dataset.py

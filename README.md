@@ -1,7 +1,7 @@
 # De-Identification for Car License Plate
 ## System Architecture
 - Detection System using WBF
-![image](https://github.com/skatld123/deIdentification-clp/assets/79092711/0fb71d41-c1cd-4836-a875-11160f245372)
+![image](https://github.com/skatld123/deIdentification-clp/assets/79092711/5e16590a-375c-4c54-b066-9cf11bc1a1fa)
 - De-id System using 4-Point Detection
 ![image](https://github.com/skatld123/deIdentification-clp/assets/79092711/a68fe801-3151-449f-8047-4aa3339c0df8)
 
